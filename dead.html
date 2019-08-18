@@ -1,0 +1,47 @@
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script>
+var wiki
+var ln;
+today='2019-08-15'
+wbase='https://query.wikidata.org/sparql?format=json&query='
+sparql='SELECT ?p ?pLabel ?date WHERE {?p wdt:P31 wd:Q5. ?p wdt:P570 ?date. FILTER (?date>"' + today + 'T00:00:00Z"^^xsd:dateTime) SERVICE wikibase:label {bd:serviceParam wikibase:language "[AUTO_LANGUAGE],nl,en,de,fr".}}'
+url=wbase+sparql
+//alert(url)
+$.get(url,dsp);
+
+function dsp(d) {
+wiki=d;
+var i;
+qn=''
+sp=''
+ln=d.results.bindings.length
+for (i=0; i<ln ; i++) {
+   qn+=sp + d.results.bindings[i].p.value.split('/')[4]
+   sp=' '
+   }
+//alert(qn)
+$.get('http://kbresearch.nl/qlookup/?qids='+qn,dsp2)
+}
+
+tbl='<table><tr><b><td>Naam</td><td>#treffers</td><td>Wikidata Id</td><td>Datum overlijden</td></b></tr><tr><td> </td></tr>'
+function dsp2(d) {
+var i,j;
+ln2=d.length
+for (j=0 ; j<ln2 ; j++) {
+   if (d[j].n > 0) {
+      for (i=0 ; i<ln ; i++) {
+         if (d[j].q==wiki.results.bindings[i].p.value.split('/')[4]) 
+tbl+='<tr><td><a href="http://www.kbresearch.nl/xportal?[' + wiki.results.bindings[i].pLabel.value + ']">' + wiki.results.bindings[i].pLabel.value + '</a></td><td>' + d[j].n + '</td><td><a href="' + wiki.results.bindings[i].p.value + '">' + d[j].q + '</a></td><td>' + wiki.results.bindings[i].date.value.split('T')[0] + '</td></tr>'
+         }
+      }
+   }
+tbl+='</table>'
+//alert(tbl)
+document.getElementById('tabl').innerHTML=tbl;
+}
+
+</script>
+<h2>Overzicht personen die onlangs overleden zijn</h2>
+<div id="tabl">Geen recente gevallen gevonden</div>
+</html>
